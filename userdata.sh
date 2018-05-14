@@ -56,9 +56,9 @@ echo export AIRFLOW_HOME=/home/airflow/airflow > /etc/profile.d/airflow.sh
 # setting up Airflow
 # following commands should be run under airflow user
 su -c ip4addr="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')" - airflow
-su -c AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@$ip4addr:5432/airflow - airflow
+su -c AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2airflow:airflow@$ip4addr:5432/airflow - airflow
 su -c export AIRFLOW__CORE__SQL_ALCHEMY_CONN - airflow
-airflow initdb
+sudo airflow initdb
 
 
 sed -i "s|sql_alchemy_conn = .*|sql_alchemy_conn = $AIRFLOW__CORE__SQL_ALCHEMY_CONN|g" "$AIRFLOW_HOME"/airflow.cfg
@@ -72,5 +72,5 @@ sed -i "s|flower_host = .*|flower_host = $ip4addr|g" "$AIRFLOW_HOME"/airflow.cfg
 sed -i "s|localhost|$ip4addr|" "$AIRFLOW_HOME"/airflow.cfg
 
 # upgradedb airflow upgradedb and start airflow
-airflow upgradedb
-airflow webserver -p 8080
+sudo airflow upgradedb
+sudo airflow webserver -p 8080
