@@ -13,7 +13,7 @@
 This file provides creation of AWS resources.
 
 ## variables.tf
-This file provides the variables main.tf will be using.
+This file provides the variables that main.tf will be using.
 
 ## userdata.sh
 This file installs Aiflow, PostgresSQL and Redis.
