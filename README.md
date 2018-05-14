@@ -10,10 +10,10 @@
 - Development and testing was done on a macOS High Sierra version 10.13.4
  
 ## main.tf
-This file provides CDIR block design for Prod VPC and Corp.
+This file provides creation of AWS resources.
 
 ## variables.tf
-This file provides strategy to migrate local mysql to RDS.
+This file provides the variables main.tf will be using.
 
 ## userdata.sh
-This file installs
+This file installs Aiflow, PostgresSQL and Redis.
