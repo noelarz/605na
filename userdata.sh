@@ -1,14 +1,18 @@
 #!/bin/sh
 
+# initial system updates and installs
+apt-get update && apt-get upgrade -y && apt-get autoremove && apt-get autoclean
+
+apt-get -y install build-essential binutils gcc make git htop nethogs tmux
+
 # installing PostgreSQL and preparing the database / VERSION 9.5 (or higher)
-#apt-get -y install postgresql postgresql-contrib libpq-dev postgresql-client postgresql-client-common
+apt-get -y install postgresql postgresql-contrib libpq-dev postgresql-client postgresql-client-common
 
-#echo "CREATE USER airflow PASSWORD 'airflow'; CREATE DATABASE airflow; GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO airflow;" | sudo -u postgres psql
-#sudo -u postgres sed -i "s|#listen_addresses = 'localhost'|listen_addresses = '*'|" /etc/postgresql/9.5/main/postgresql.conf
-#sudo -u postgres sed -i "s|127.0.0.1/32|0.0.0.0/0|" /etc/postgresql/9.5/main/pg_hba.conf
-#sudo -u postgres sed -i "s|::1/128|::/0|" /etc/postgresql/9.5/main/pg_hba.conf
-#service postgresql restart
-
+echo "CREATE USER airflow PASSWORD 'airflow'; CREATE DATABASE airflow; GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO airflow;" | sudo -u postgres psql
+sudo -u postgres sed -i "s|#listen_addresses = 'localhost'|listen_addresses = '*'|" /etc/postgresql/9.5/main/postgresql.conf
+sudo -u postgres sed -i "s|127.0.0.1/32|0.0.0.0/0|" /etc/postgresql/9.5/main/pg_hba.conf
+sudo -u postgres sed -i "s|::1/128|::/0|" /etc/postgresql/9.5/main/pg_hba.conf
+service postgresql restart
 
 # installing Redis and setting up the configurations
 apt-get -y install redis-server
@@ -24,7 +28,7 @@ sudo apt-get update
 apt-get -y install python3 python3-dev python3-pip python3-wheel
 apt install python3-pip
 pip3 install --upgrade pip
-pip install futures pandas SQLAlchemy psycopg2 celery redis flower flask-bcrypt boto3 ldap3 pymssql azure-servicebus flask_cache
+pip install pandas SQLAlchemy psycopg2 celery redis flower flask-bcrypt boto3 ldap3 pymssql azure-servicebus flask_cache
 
 
 # create airflow user with sudo capability
@@ -51,12 +55,11 @@ echo export AIRFLOW_HOME=/home/airflow/airflow > /etc/profile.d/airflow.sh
 
 # setting up Airflow
 # following commands should be run under airflow user
-su - airflow 
-
-ip4addr="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')"
-AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@$ip4addr:5432/airflow
-export AIRFLOW__CORE__SQL_ALCHEMY_CONN
+su -c ip4addr="$(ip route get 8.8.8.8 | awk '{print $NF; exit}')" - airflow
+su -c AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@$ip4addr:5432/airflow - airflow
+su -c export AIRFLOW__CORE__SQL_ALCHEMY_CONN - airflow
 airflow initdb
+
 
 sed -i "s|sql_alchemy_conn = .*|sql_alchemy_conn = $AIRFLOW__CORE__SQL_ALCHEMY_CONN|g" "$AIRFLOW_HOME"/airflow.cfg
 sed -i "s|executor = .*|executor = CeleryExecutor|g" "$AIRFLOW_HOME"/airflow.cfg
